@@ -147,9 +147,9 @@ public class IntakePositionSubsystem extends SubsystemBase {
             liftAscending = liftAscendingNow;
             if (liftAscending) {
                 liftMotor2Config.closedLoop.pid(IntakePositionConstants.kLiftPosP, IntakePositionConstants.kLiftI, IntakePositionConstants.kLiftPosD);
-            } else {
-                liftMotor2Config.closedLoop.pid(IntakePositionConstants.kLiftNegP, IntakePositionConstants.kLiftI, IntakePositionConstants.kLiftNegD);
-            }
+             }// else {
+            //     liftMotor2Config.closedLoop.pid(IntakePositionConstants.kLiftNegP, IntakePositionConstants.kLiftI, IntakePositionConstants.kLiftNegD);
+            // }
             m_liftMotor2.configure(liftMotor2Config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
         }
     }
