@@ -4,11 +4,13 @@ import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import frc.robot.Constants;
 import frc.robot.subsystems.IntakePositionSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 
 public final class IntakePositionCommand {
+    private double lastPosisition=0;
 
     //Constructor to allow for each Command to reference the subsystem without a parameter
     private IntakePositionSubsystem intakePositionSubsystem;
@@ -163,5 +165,28 @@ public final class IntakePositionCommand {
             return false;
         }
     }
+    private boolean stopAuto0=false;
+    public Command Auto0Lift=new FunctionalCommand(
+        ()->intakePositionSubsystem.setLiftSpeed(-0.2),
+        // Start driving forward at the start of the command
+        () -> {
+            if(lastPosisition<=intakePositionSubsystem.getLiftPosition()){
+                stopAuto0=true;
+            }
+            lastPosisition=intakePositionSubsystem.getLiftPosition();
+        },
+        // stop lift and set 0
+        interrupted -> {
+        intakePositionSubsystem.zeroLift();
+        intakePositionSubsystem.setLiftSpeed(0);
+        stopAuto0=false;
+        },
 
+        //when stop auto0 stop it
+        () -> stopAuto0,
+        //require intake posistion
+        intakePositionSubsystem
+        
+    );
+    
 }

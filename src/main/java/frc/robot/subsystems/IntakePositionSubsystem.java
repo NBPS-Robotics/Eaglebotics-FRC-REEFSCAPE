@@ -218,7 +218,7 @@ public class IntakePositionSubsystem extends SubsystemBase {
     public boolean pivotAtTargetPos() {
         return Math.abs(getPivotError()) < IntakePositionConstants.kPivotTolerance;
     }
-
+    
     public void setIntakePositionSetpoints(double liftSetpoint, double pivotSetpoint, Integer forLevel) {
         setLiftSetpoint(liftSetpoint, forLevel);
         setPivotSetpoint(pivotSetpoint, forLevel);

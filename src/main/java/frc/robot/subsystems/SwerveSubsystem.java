@@ -87,16 +87,7 @@ public class SwerveSubsystem extends SubsystemBase
    */
   public SwerveSubsystem(File directory)
   {
-    // ---- Swerve fix 4 part 1 ----
-    /* CANCoderSwerve cancoderEnc = new CANCoderSwerve(30);
-    CanAndMagSwerve canmagEnc1 = new CanAndMagSwerve(31);
-    CanAndMagSwerve canmagEnc2 = new CanAndMagSwerve(32);
-    CanAndMagSwerve canmagEnc3 = new CanAndMagSwerve(33);
-    //double cancoderAbs = cancoderEnc.encoder.getAbsolutePosition();
-    double canmagAbs1 = canmagEnc1.encoder.getAbsPosition();
-    double canmagAbs2 = canmagEnc2.encoder.getAbsPosition();
-    double canmagAbs3 = canmagEnc3.encoder.getAbsPosition(); */
-    // ---- End fix ----
+   
 
     // Angle conversion factor is 360 / (GEAR RATIO * ENCODER RESOLUTION)
     //  In this case the gear ratio is 12.8 motor revolutions per wheel rotation.
@@ -127,16 +118,7 @@ public class SwerveSubsystem extends SubsystemBase
                                                0.1); //Correct for skew that gets worse as angular velocity increases. Start with a coefficient of 0.1.
     swerveDrive.setModuleEncoderAutoSynchronize(true,
                                                 1); // Enable if you want to resynchronize your absolute encoders and motor encoders periodically when they are not moving.
-    //swerveDrive.pushOffsetsToEncoders(); // Set the absolute encoder to be used over the internal encoder and push the offsets onto it. Throws warning if not possible
-
-    // Swerve fix 1 or 2
-    //fixEncoders();
-
-    // Swerve fix 4 (part 2)
-    /* cancoderEnc.setAbsoluteEncoderOffset(0);
-    canmagEnc1.encoder.setAbsPosition(canmagAbs1);
-    canmagEnc2.encoder.setAbsPosition(canmagAbs2);
-    canmagEnc3.encoder.setAbsPosition(canmagAbs3); */
+ 
     
     setupPathPlanner();
     pigeon=(Pigeon2)swerveDrive.swerveDriveConfiguration.imu.getIMU();
@@ -502,6 +484,34 @@ public class SwerveSubsystem extends SubsystemBase
                         true);
     });
   }
+
+  /**
+   * Command to drive the robot using translative values and heading as angular velocity.
+   *
+   * @param translationX     Translation in the X direction.
+   * @param translationY     Translation in the Y direction.
+   * @param angularRotationX Angular velocity of the robot to set.
+   * @param translationDeadband Circular deadband radius to be applied to the translation input.
+   * @param rotationDeadband    Deadband range around zero to be applied to the rotation input.
+   * @return Drive command.
+   * @see MathUtil#applyDeadband(double, double)
+   */
+  public Command driveRobotCentricCommand(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX,
+                              double translationDeadband, double rotationDeadband)
+  {
+    return run(() -> {
+      // Make the robot move
+      double[] transV = deadband2d(translationX.getAsDouble(), translationY.getAsDouble(), translationDeadband);
+      double angRot = MathUtil.applyDeadband(angularRotationX.getAsDouble(), rotationDeadband);
+      swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
+                        transV[0] * swerveDrive.getMaximumChassisVelocity() * driveMultiplier,
+                        transV[1] * swerveDrive.getMaximumChassisVelocity() * driveMultiplier), 0.8),
+                        angRot * swerveDrive.getMaximumChassisAngularVelocity() * driveMultiplier,
+                        false,
+                        true);
+    });
+  }
+
 
   /**
    * Command to drive the robot using translative values and heading as a setpoint.

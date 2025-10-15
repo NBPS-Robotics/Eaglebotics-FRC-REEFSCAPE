@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.OIConstants;
 import frc.robot.commands.oldordrivecommands.AutoCommands.WaitCommand;
 import frc.robot.commands.oldordrivecommands.ScoreCommands.BallIntakeCommands;
 import frc.robot.commands.oldordrivecommands.ScoreCommands.HangCommands;
@@ -65,6 +66,9 @@ public class RobotContainer
   public final BallIntakeSubsystem ballIntake = new BallIntakeSubsystem();
   //public HangSubsystem hangSubsystem = null;
 
+  boolean pipePos=true;
+  public final Trigger IsPipePos=new Trigger(()->pipePos);
+  public final Trigger IsBallPos=new Trigger(()->!pipePos);
   PipeIntakeCommands pipeIntakeCommands = new PipeIntakeCommands(pipeIntake);
   BallIntakeCommands ballIntakeCommands = new BallIntakeCommands(ballIntake);
   IntakePositionCommand intakePositionCommands = new IntakePositionCommand(intakePosition);
@@ -101,7 +105,7 @@ public class RobotContainer
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer()
-  {
+  { 
     // Attempt to obtain hang subsystem (do not crash if failed)
     /* try {
       hangSubsystem = new HangSubsystem();
@@ -681,37 +685,46 @@ public class RobotContainer
   private SequentialCommandGroup getSetposCommand(){
     IntakePositionSubsystem.Posistions posistion=intakePosition.targetpos;
     if(posistion==Posistions.L4){
+      pipePos=true;
       return new SequentialCommandGroup(opCommands.pipeCommandGroup(4));
     } else if(posistion==Posistions.L3){
+      pipePos=true;
       return new SequentialCommandGroup(opCommands.pipeCommandGroup(3));
     } else if(posistion==Posistions.L2){
+      pipePos=true;
       return new SequentialCommandGroup(opCommands.pipeCommandGroup(2));
     } else if(posistion==Posistions.L1){
+      pipePos=true;
       return new SequentialCommandGroup(opCommands.pipeCommandGroup(1));
     } else if(posistion==Posistions.Ground_Ball){
+      pipePos=false;
       return new SequentialCommandGroup(
         opCommands.ballCommandGroup(1),
         ballIntakeCommands. new Intake(),
         new StowCommand(intakePosition)
       );
     } else if(posistion==Posistions.High_Algae){
+      pipePos=false;
       return new SequentialCommandGroup(
         opCommands.ballCommandGroup(4),
         ballIntakeCommands. new Intake(),
         new StowCommand(intakePosition)
       );
     } else if(posistion==Posistions.Low_Algae){
+      pipePos=false;
       return new SequentialCommandGroup(
         opCommands.ballCommandGroup(3),
         ballIntakeCommands. new Intake(),
         new StowCommand(intakePosition)
       );
     } else if(posistion==Posistions.Processor){
+      pipePos=false;
       return new SequentialCommandGroup(
         opCommands.ballCommandGroup(2),
         ballIntakeCommands. new Intake()
       );
     } else if(posistion==Posistions.Barge){
+      pipePos=false;
       return opCommands.bargeShootCommandGroup();
     } else{
       return new SequentialCommandGroup(opCommands.getStowParallelCommand());
@@ -727,10 +740,23 @@ public class RobotContainer
     //Joysticks (Default) - Drive the robot
     Command driveCommand = OpCommands.getDriveCommand(drivebase, driverGamepad);
     drivebase.setDefaultCommand(driveCommand);
+    driverGamepad.povLeft().whileTrue(drivebase.driveRobotCentricCommand(
+      ()->0.5,
+      ()->0,
+      ()->0, 
+      OIConstants.kDriveDeadband, OIConstants.kDriveDeadband
+      ));
+    driverGamepad.povRight().whileTrue(drivebase.driveRobotCentricCommand(
+      ()->-0.5,
+      ()->0,
+      ()->0, 
+      OIConstants.kDriveDeadband, OIConstants.kDriveDeadband
+      ));
+
     //sticksInUseTrigger(driverGamepad).whileTrue(driveCommand); // to interrupt other commands when the sticks are in use
 
     //L2 - Gets the slow version (half speed) of the drive command. That way our robot can go slow.
-    //driverGamepad.L2().whileTrue(OpCommands.getTemporarySlowSpeedCommand(drivebase));
+    driverGamepad.L2().whileTrue(OpCommands.getTemporarySlowSpeedCommand(drivebase));
 
     //Options - Zeros the robot heading
     driverGamepad.options().onTrue(Commands.runOnce(drivebase::zeroGyro));
@@ -741,16 +767,17 @@ public class RobotContainer
     //driverGamepad.L2().whileTrue(telePathingCommands.getAutoDriveDeferredCommand());
 
     //R2 - Pipe Outtake
-    driverGamepad.R2().onTrue(pipeIntakeCommands.getAwareOuttakeCommand(intakePosition, intakePositionCommands));
+    driverGamepad.R1().and(IsPipePos).onTrue(pipeIntakeCommands.getAwareOuttakeCommand(intakePosition, intakePositionCommands));
+    driverGamepad.R1().and(IsBallPos).onTrue(ballIntakeCommands.getAwareOuttakeCommand(intakePosition, intakePositionCommands));
 
     // //Circle - Ball Outtake
     // driverGamepad.circle().onTrue(ballIntakeCommands.getAwareOuttakeCommand(intakePosition, intakePositionCommands));
 
     // -- Pipe Intake --
-    driverGamepad.R1().onTrue(opCommands.getPipeIntakeFullCommand(pipeIntakeCommands));
+    driverGamepad.R2().onTrue(opCommands.getPipeIntakeFullCommand(pipeIntakeCommands));
 
     //go to posistion selected by codriver
-    driverGamepad.L2().onTrue(getSetposCommand());
+    driverGamepad.L1().onTrue(getSetposCommand());
 
     
 
@@ -815,7 +842,7 @@ public class RobotContainer
     coDriverGamepad.triangle().whileTrue(intakePositionCommands.new AdjustLift(() -> -0.5));
 
     //Gamepad:Square - Zero Lift
-    coDriverGamepad.square().onTrue(Commands.runOnce(intakePosition::zeroLift));
+    coDriverGamepad.square().onTrue(intakePositionCommands.Auto0Lift);
 
     //Gamepad:Circle - Unset Auto Drive
     coDriverGamepad.circle().onTrue(Commands.runOnce(telePathingCommands::setAutoDriveNone));
