@@ -9,7 +9,8 @@ import frc.robot.subsystems.IntakePositionSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 
 public final class IntakePositionCommand {
-
+    private double lastPosisition=0;
+    
     //Constructor to allow for each Command to reference the subsystem without a parameter
     private IntakePositionSubsystem intakePositionSubsystem;
 

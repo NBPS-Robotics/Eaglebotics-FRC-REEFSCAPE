@@ -309,11 +309,12 @@ public class OpCommands {
                 
                 break;
             case 3:
+            System.out.println("wjhfwehfufiewfyweyfiuewfiw");
                  command= new SequentialCommandGroup(
                     quickStowPivot(3),
                     intakePositionCommand. new SetLiftSetpoint(Constants.OpConstantsForPipe.Pipe3Lift, 3),
                     intakePositionCommand. new SetPivotSetpoint(Constants.OpConstantsForPipe.Pipe3Pivot, 3)
-                );
+                    );
                 
                 break;
             case 4:

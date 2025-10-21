@@ -28,6 +28,19 @@ import frc.robot.commands.oldordrivecommands.AutoCommands.WaitCommand;
 import frc.robot.commands.oldordrivecommands.ScoreCommands.StowCommand;
 
 public class IntakePositionSubsystem extends SubsystemBase {
+    public static enum Posistions {
+        L4,
+        L3,
+        L2,
+        L1,
+        Ground_Ball,
+        Processor,
+        Low_Algae,
+        High_Algae,
+        Barge,
+        Stow
+    }
+    public static Posistions targetpos=Posistions.Stow;
     LinearFilter Tempfilter1=LinearFilter.movingAverage(5);
     LinearFilter Tempfilter2=LinearFilter.movingAverage(5);
     private boolean OverrideTempLimit=false;
