@@ -39,23 +39,24 @@ public final class Constants {
 
 
   public static final class OpConstantsForPipe {
-    public static final double Pipe1Lift = 0.65 * ratio; //TROUGH (LEVEL 1)
+    public static final double offset=-0.05;
+    public static final double Pipe1Lift = (offset+0.65) * ratio; //TROUGH (LEVEL 1)
     public static final double Pipe1Pivot = 0.35;
 
-    public static final double Pipe2Lift = 3.57 * ratio; //LEVEL 2
+    public static final double Pipe2Lift = (offset+3.57) * ratio; //LEVEL 2
     public static final double Pipe2Pivot = 0.21;
 
-    public static final double Pipe3Lift = 5.3 * ratio; //LEVEL 3
+    public static final double Pipe3Lift = (offset+5.3) * ratio; //LEVEL 3
     public static final double Pipe3Pivot = 0.31424;
 
     public static final double Pipe4Lift = 10.45 * ratio; //LEVEL 4
     public static final double Pipe4Pivot = 0.24;
     public static final double Pipe4PivotOut = 0.4; //Applied while outtaking
 
-    public static final double PipeRetLift = 2.8 * ratio;
+    public static final double PipeRetLift = (offset+2.8) * ratio;
     public static final double PipeRetPivot = 0.345;
 
-    public static final double PipeIntakeLift = 2.8 * ratio; //REDUNDENT WITH PipeRetLift
+    public static final double PipeIntakeLift = (offset+2.8) * ratio; //REDUNDENT WITH PipeRetLift
     public static final double PipeIntakePivot = 0.345; //REDUNDENT WITH PipeRetPivot
   }
 

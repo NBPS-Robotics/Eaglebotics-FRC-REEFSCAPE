@@ -896,13 +896,13 @@ public class RobotContainer
     //CODRIVER CONTROLS:
 
     //C2:R4 - Stow Position
-    buttonPanel.button(10).onTrue(opCommands.getStowParallelCommand());
-    driverGamepad.triangle().onTrue(opCommands.getStowParallelCommand());
+    buttonPanel.button(10).onTrue(opCommands.getStowParallelCommand()/*.andThen(intakePositionCommands.Auto0Lift()))*/);
+    driverGamepad.triangle().onTrue(opCommands.getStowParallelCommand()/*.andThen(intakePositionCommands.Auto0Lift()))*/);
 
     //C1:R1-3 - Pipe Set Positions 2-4
     buttonPanel.button(1).onTrue(opCommands.pipeCommandGroup(4).alongWith(new InstantCommand(()->pipePos=true)));
-    driverGamepad.circle().onTrue(opCommands.pipeCommandGroup(3).alongWith(new InstantCommand(()->pipePos=true)));
-    driverGamepad.square().onTrue(opCommands.pipeCommandGroup(2).alongWith(new InstantCommand(()->pipePos=true)));
+    driverGamepad.square().onTrue(opCommands.pipeCommandGroup(3).alongWith(new InstantCommand(()->pipePos=true)));
+    driverGamepad.circle().onTrue(opCommands.pipeCommandGroup(2).alongWith(new InstantCommand(()->pipePos=true)));
 
     //Gamepad:Dpad Down - Pipe Set Position 1
     driverGamepad.cross().onTrue(opCommands.pipeCommandGroup(1).alongWith(new InstantCommand(()->pipePos=true)));
@@ -927,9 +927,8 @@ public class RobotContainer
     driverGamepad.povUp().onTrue(opCommands.bargeShootCommandGroup().alongWith(new InstantCommand(()->pipePos=false)));
 
     
-    driverGamepad.L1().onTrue(new SequentialCommandGroup(
-      opCommands.ballCommandGroup(2),
-      ballIntakeCommands. new Intake()
+    driverGamepad.povDown().onTrue(new SequentialCommandGroup(
+      opCommands.ballCommandGroup(2)
     ).alongWith(new InstantCommand(()->pipePos=false)));
 
     

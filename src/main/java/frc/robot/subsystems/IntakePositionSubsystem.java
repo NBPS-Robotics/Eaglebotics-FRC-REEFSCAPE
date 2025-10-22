@@ -17,6 +17,7 @@ import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -28,6 +29,7 @@ import frc.robot.commands.oldordrivecommands.AutoCommands.WaitCommand;
 import frc.robot.commands.oldordrivecommands.ScoreCommands.StowCommand;
 
 public class IntakePositionSubsystem extends SubsystemBase {
+    //private double lastPosisition=0;
     public static enum Posistions {
         L4,
         L3,
@@ -233,5 +235,29 @@ public class IntakePositionSubsystem extends SubsystemBase {
         double[] out={m_liftMotor1.getOutputCurrent(),m_liftMotor2.getOutputCurrent(),m_pivotMotor1.getOutputCurrent()};
         return out;
     }
+
+    // private boolean stopAuto0=false;
+    // public Command Auto0Lift=new FunctionalCommand(
+    //     ()->setLiftSpeed(-0.2),
+        
+    //     () -> {
+    //         if(lastPosisition<=getLiftPosition()){
+    //             stopAuto0=true;
+    //         }
+    //         lastPosisition=getLiftPosition();
+    //     },
+    //     // stop lift and set 0
+    //     interrupted -> {
+    //     zeroLift();
+    //     setLiftSpeed(0);
+    //     stopAuto0=false;
+    //     },
+
+    //     //when stop auto0 stop it
+    //     () -> stopAuto0,
+    //     //require intake posistion
+    //     this
+        
+    // );
 
 }
