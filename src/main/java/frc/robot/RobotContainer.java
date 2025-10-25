@@ -130,7 +130,7 @@ public class RobotContainer
     //configureBindings3(); // Toggleable pipe/ball mode with sequential command groups for IntakePosition set positions
     //configureBindingsPanel1(); // Co-driver controls on the custom button panel with sequential command groups for IntakePosition set positions
     //configureBindingsPanel2(); // Alternate co-driver controls on the custom button panel with sequential command groups for IntakePosition set positions
-    configureBindingsPanel3(); // controls where driver confirms posistion selected by codriver with more automation, most of the time auto stows
+    //configureBindingsPanel3(); // controls where driver confirms posistion selected by codriver with more automation, most of the time auto stows
     configureBindingsPanel4(); // controls where driver confirms posistion selected by codriver with more automation, most of the time auto stows
     setAutoCommands();
     
@@ -896,8 +896,8 @@ public class RobotContainer
     //CODRIVER CONTROLS:
 
     //C2:R4 - Stow Position
-    buttonPanel.button(10).onTrue(opCommands.getStowParallelCommand()/*.andThen(intakePositionCommands.Auto0Lift()))*/);
-    driverGamepad.triangle().onTrue(opCommands.getStowParallelCommand()/*.andThen(intakePositionCommands.Auto0Lift()))*/);
+    buttonPanel.button(10).onTrue(opCommands.getStowParallelCommand().andThen(intakePositionCommands.Auto0Lift()));
+    driverGamepad.triangle().onTrue(opCommands.getStowParallelCommand().andThen(intakePositionCommands.Auto0Lift()));
 
     //C1:R1-3 - Pipe Set Positions 2-4
     buttonPanel.button(1).onTrue(opCommands.pipeCommandGroup(4).alongWith(new InstantCommand(()->pipePos=true)));
@@ -945,6 +945,7 @@ public class RobotContainer
 
 
     coDriverGamepad.PS().and(coDriverGamepad.options()).onTrue(intakePosition.disableLiftCommand());
+  
 
 
 
@@ -967,13 +968,16 @@ public class RobotContainer
             .whileTrue(intakePositionCommands.new AdjustPivot(() -> buttonPanel.getRawAxis(5)));
     
     //Gamepad:Triangle - Move Lift Down
-    coDriverGamepad.triangle().whileTrue(intakePositionCommands.new AdjustLift(() -> -0.5));
+    //coDriverGamepad.triangle().whileTrue(intakePositionCommands.new AdjustLift(() -> -0.5));
+    coDriverGamepad.triangle().onTrue(intakePositionCommands.Auto0Lift());
 
     //Gamepad:Square - Zero Lift
     coDriverGamepad.square().onTrue(Commands.runOnce(intakePosition::zeroLift));
 
     //Gamepad:Cross (hold for 0.4s) - Reset Odometry from Vision
     coDriverGamepad.cross().debounce(0.4).onTrue(Commands.runOnce(this::resetOdometryFromVision));
+    buttonPanel.button(13).onTrue(Commands.runOnce(intakePosition::zeroLift));
+    buttonPanel.button(3).onTrue(intakePosition.disableLiftCommand());
   }
 
 

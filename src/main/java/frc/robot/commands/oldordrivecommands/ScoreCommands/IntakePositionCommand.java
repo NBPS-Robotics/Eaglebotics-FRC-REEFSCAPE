@@ -5,6 +5,8 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants;
 import frc.robot.subsystems.IntakePositionSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
@@ -167,27 +169,12 @@ public final class IntakePositionCommand {
     }
 
     private boolean stopAuto0=false;
-    public Command Auto0Lift() {
-        return new FunctionalCommand(
-            ()->intakePositionSubsystem.setLiftSpeed(0.2),
-            // Start driving forward at the start of the command
-            () -> {
-                if(lastPosisition<=intakePositionSubsystem.getLiftPosition()){
-                    stopAuto0=true;
-                }
-                lastPosisition=intakePositionSubsystem.getLiftPosition();
-            },
-            // stop lift and set 0
-            interrupted -> {
-                intakePositionSubsystem.zeroLift();
-                intakePositionSubsystem.setLiftSpeed(0);
-                stopAuto0=false;
-            },
-
-            //when stop auto0 stop it
-            () -> stopAuto0,
-            //require intake posistion
-            intakePositionSubsystem
+    public SequentialCommandGroup Auto0Lift() {
+        return new SequentialCommandGroup(
+            new InstantCommand(()->intakePositionSubsystem.setLiftSpeed(-0.2)),
+            new WaitCommand(0.3),
+            new InstantCommand(intakePositionSubsystem::zeroLift),
+            new InstantCommand(()->intakePositionSubsystem.setLiftSpeed(0))
         );
     }
 
