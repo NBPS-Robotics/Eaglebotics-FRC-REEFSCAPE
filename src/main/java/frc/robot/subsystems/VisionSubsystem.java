@@ -12,7 +12,10 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.RobotContainer;
+import frc.robot.commands.oldordrivecommands.AutoCommands.DriveCommand;
 import frc.utils.LimelightHelpers;
+import frc.utils.LimelightHelpers.PoseEstimate;
 
 /**
  * Massive credit to team 4253 Raid Zero.
@@ -135,14 +138,15 @@ public class VisionSubsystem extends SubsystemBase{
      * The main loop of the Limelight odometry thread
      */
     private void loop() {
-        if (swerve.pigeon.getAngularVelocityZWorld().getValueAsDouble() > 720) {
+        if (swerve.pigeon.getAngularVelocityZWorld().getValueAsDouble() > 360) {
             ignoreAllLimes = true;
         } else {
             ignoreAllLimes = false;
         }
 
-        updateFrontLime();
+        //updateFrontLime();
         //updateBackLime();
+        updateAllLimes();
     }
 
     /**
@@ -173,7 +177,7 @@ public class VisionSubsystem extends SubsystemBase{
                 (limeFPrev != null && (limeF.pose.getTranslation().getDistance(limeFPrev.pose.getTranslation()) /
                     (limeF.timestampSeconds - limeFPrev.timestampSeconds)) > DriveConstants.kSpeedAt12Volts.baseUnitMagnitude()) ||
                 (limeFPrev != null && (limeF.pose.getTranslation()
-                    .getDistance(limeFPrev.pose.getTranslation()) > DriveConstants.kSpeedAt12Volts.baseUnitMagnitude() * 0.02)) ||
+                    .getDistance(limeFPrev.pose.getTranslation()) > DriveConstants.MaxErrorFromBot)/*DriveConstants.kSpeedAt12Volts.baseUnitMagnitude() * 0.02)*/) ||
                 (limeF.rawFiducials.length > 0 && limeF.rawFiducials[0].ambiguity > 0.5 &&
                     limeF.rawFiducials[0].distToCamera > 4.0) ||
                 limeF.pose.equals(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
@@ -223,7 +227,7 @@ public class VisionSubsystem extends SubsystemBase{
                 (limeBPrev != null && (limeB.pose.getTranslation().getDistance(limeBPrev.pose.getTranslation()) /
                     (limeB.timestampSeconds - limeBPrev.timestampSeconds)) > DriveConstants.kSpeedAt12Volts.baseUnitMagnitude()) ||
                 (limeBPrev != null && (limeB.pose.getTranslation()
-                    .getDistance(limeBPrev.pose.getTranslation()) > DriveConstants.kSpeedAt12Volts.baseUnitMagnitude() * 0.02)) ||
+                    .getDistance(limeBPrev.pose.getTranslation()) > DriveConstants.MaxErrorFromBot)/*DriveConstants.kSpeedAt12Volts.baseUnitMagnitude() * 0.02)*/) ||
                 (limeB.rawFiducials.length > 0 && limeB.rawFiducials[0].ambiguity > 0.5 &&
                     limeB.rawFiducials[0].distToCamera > 4.0) ||
                 limeB.pose.equals(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
@@ -244,6 +248,58 @@ public class VisionSubsystem extends SubsystemBase{
             limeBPrev = limeB;
         }
     }
+     /**
+     * Updates the odometry for the back limelight,using another method
+     */
+    private void updateAllLimes() {//new test vision method
+        double r=swerve.getPose().getRotation().getDegrees();
+        LimelightHelpers.SetRobotOrientation(
+            bLimeName,
+            r,
+            swerve.pigeon.getAngularVelocityZWorld().getValueAsDouble(),
+            0,
+            0,
+            0,
+            0
+        );
+        LimelightHelpers.SetRobotOrientation(
+            fLimeName,
+            r,
+            swerve.pigeon.getAngularVelocityZWorld().getValueAsDouble(),
+            0,
+            0,
+            0,
+            0
+        );
+       
+        limeB = LimelightHelpers.getBotPoseEstimate_wpiBlue(bLimeName);
+        limeF = LimelightHelpers.getBotPoseEstimate_wpiBlue(fLimeName);
+            if (!ignoreAllLimes) {
+                SmartDashboard.putBoolean(bPoseName, true);
+                limeB = validatePoseEstimate(limeB);
+                SmartDashboard.putBoolean(fPoseName, true);
+                limeF = validatePoseEstimate(limeF);//makes sure pose is valid
+
+                PoseEstimate bestPose;
+            if (limeF!= null && limeB != null) {
+                bestPose = (limeF.avgTagArea >= limeB.avgTagArea) ? limeF : limeB;
+         } else if (limeF != null) {//tries to get the best pose
+              bestPose = limeF;
+            } else {
+            bestPose = limeB;
+            }
+                
+            if (bestPose != null) {
+                swerve.swerveDrive.addVisionMeasurement(
+                    bestPose.pose,
+                    bestPose.timestampSeconds,
+                    VecBuilder.fill(0.75, 0.75, 45));
+            } 
+        }
+    
+    }
+    
+
 
     /**
      * Checks if a pose is inside the field dimensions
@@ -257,4 +313,20 @@ public class VisionSubsystem extends SubsystemBase{
             pose.getTranslation().getY() > 0 &&
             pose.getTranslation().getY() < 8.05;
     }
+
+    public PoseEstimate validatePoseEstimate(PoseEstimate poseEstimate) {
+        if (poseEstimate == null) return null;
+            
+            double tagMin = 1;
+            double tagMax = 2;
+            double minArea = 0.08;
+            if (poseEstimate.tagCount == 1) minArea = 0.18;
+            if (poseEstimate.tagCount > tagMax || poseEstimate.tagCount < tagMin) return null;
+            if (poseEstimate.avgTagArea < minArea) return null;
+            if (poseEstimate.avgTagDist > 3.25) return null;
+            if(poseEstimate.rawFiducials[0].ambiguity > .65)return null;
+            return poseEstimate;
+        
+}
+
 }
