@@ -186,7 +186,6 @@ public class RobotContainer
    */
   private void configureBindingsPanel2()
   {
-
     // DRIVER CONTROLS:
 
     //Joysticks (Default) - Drive the robot
@@ -307,8 +306,6 @@ public class RobotContainer
 
     //coDriverGamepad.PS().and(coDriverGamepad.options()).debounce(0.1).onTrue(Commands.runOnce(() -> Robot.getInstance().stopCamera()));
     coDriverGamepad.PS().and(coDriverGamepad.options()).onTrue(intakePosition.disableLiftCommand());
-
-
 
     // -- Manual Control Overrides --
     // Reminder: the controller is placed upside-down.
