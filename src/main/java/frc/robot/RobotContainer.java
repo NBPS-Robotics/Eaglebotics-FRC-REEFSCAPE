@@ -22,11 +22,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.oldordrivecommands.AutoCommands.WaitCommand;
 import frc.robot.commands.oldordrivecommands.ScoreCommands.BallIntakeCommands;
@@ -52,7 +49,6 @@ import swervelib.SwerveModule;
  */
 public class RobotContainer
 {//test
-  public double[] maxCurrentElevator={0,0,0};
   // The robot's subsystems and commands are defined here...
   public final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
                                                                          "swerve"));
@@ -145,11 +141,6 @@ public class RobotContainer
 
 
 
-  private boolean isBallMode = false;
-
-  private void toggleBallMode() {
-    isBallMode = !isBallMode;
-  }
 
 
 
@@ -345,11 +336,6 @@ public class RobotContainer
 
 
 
-  public Trigger sticksInUseTrigger(CommandPS5Controller gamepad) {
-    return new Trigger(() -> Math.abs(gamepad.getLeftX()) > Constants.OIConstants.kDriveDeadband
-                          || Math.abs(gamepad.getLeftY()) > Constants.OIConstants.kDriveDeadband
-                          || Math.abs(gamepad.getRightX()) > Constants.OIConstants.kDriveDeadband);
-  }
 
 
   /**
@@ -470,7 +456,7 @@ public class RobotContainer
     SmartDashboard.putNumber("Lift Sum Current Draw", intakePosition.m_liftMotor1.getOutputCurrent() + intakePosition.m_liftMotor2.getOutputCurrent());
     SmartDashboard.putNumber("Pivot Encoder Position", intakePosition.getPivotPosition());
 
-    SmartDashboard.putNumber("Pigeon Oritentation", drivebase.pigeon.getAccumGyroZ().getValueAsDouble() % 360.0);
+    SmartDashboard.putNumber("Pigeon Orientation", drivebase.pigeon.getAccumGyroZ().getValueAsDouble() % 360.0);
 
     SmartDashboard.putNumber("Lift target", intakePosition.getLiftSetpoint());
     SmartDashboard.putNumber("Pivot target", intakePosition.getPivotSetpoint());
